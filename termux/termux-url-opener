@@ -1,0 +1,86 @@
+#!/data/data/com.termux/files/usr/bin/env python
+import sys
+from pathlib import Path
+from urllib.parse import urlparse
+import requests
+from youtube_dl import YoutubeDL
+from mutagen.easyid3 import EasyID3
+from mutagen.id3 import ID3, APIC
+import ffmpeg
+from gmusicapi import Musicmanager
+
+sys.path.append('/data/data/com.termux/files/home/pylib')
+import utils
+import instagram_dl
+
+def youtube(url):
+    print('uplpad to gmusic[0] or save video[1]?')
+    result = input('[0/1]  ')
+    
+    if result == '0':
+        info = YoutubeDL().extract_info(url, download=False)
+        target = utils.finddict(info['formats'], 'format_id', '140')
+        src = Path('/data/data/com.termux/files/usr/tmp') / (info['id'] + '.' + target['ext'])
+        dst = src.with_suffix('.mp3')
+        
+        if not src.exists():
+            print('downloading ' + info['id'])
+            music = requests.get(target['url'], headers=target['http_headers'])
+            src.write_bytes(music.content)
+            
+        if not dst.exists():
+            print('converting...')
+            ffmpeg.input(str(src)).output(str(dst)).run()
+        
+        print('writing metadata...')
+        audio = EasyID3(dst)
+        audio['title'] = info['title']
+        audio['album'] = 'youtube'
+        audio['date']  = info['upload_date']
+        audio.save()
+        
+        thum = requests.get(info['thumbnail'])
+        audio = ID3(dst)
+        audio['APIC'] = APIC(encoding=3, mime=thum.headers['content-type'], type=3, desc='Cover', data=thum.content)
+        audio.save()
+        
+        print('uploading...')
+        mm = Musicmanager()
+        mm.login(oauth_credentials='/data/data/com.termux/files/home/.oauth.cred', uploader_id='D4:38:9C:04:CD:F7')
+        mm.upload([dst])
+        mm.logout()
+        
+        src.unlink()
+        dst.unlink()
+        print('finished uploading ' + info['id'])
+
+    elif result == '1':
+        opts = {
+            'format' : '(299/137/bestvideo)+(251/bestaudio)',
+            'outtmpl': '/sdcard/Download/%(title)s.%(ext)s'
+        }
+        with YoutubeDL(opts) as ytdl:
+            ytdl.download([url])
+    
+    else:
+        print('incorrect selection')
+        return
+
+
+def instagram(url):
+    instagram_dl.get(url, '/sdcard/Download')
+
+
+if __name__ == "__main__":
+    func = {
+        'www.instagram.com' : instagram,
+        'youtu.be' : youtube
+    }
+    
+    if len(sys.argv) < 2:
+        sys.exit(1)
+    
+    url = sys.argv[1]
+    host = urlparse(url).netloc
+    if host in func:
+        func[host](url)
