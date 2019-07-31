@@ -1,0 +1,11 @@
+[package]
+name = "DSC-rename"
+version = "0.1.0"
+authors = ["kumotu4632uz"]
+edition = "2018"
+
+[dependencies]
+regex = "1.2.0"
+failure = "0.1.5"
+kamadak-exif = "0.3.1"
+
