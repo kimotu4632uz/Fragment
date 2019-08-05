@@ -1,5 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/env python
 import sys
+import re
 import mimetypes
 from pathlib import Path
 from urllib.parse import urlparse
@@ -12,7 +13,22 @@ import ffmpeg
 from gmusicapi import Musicmanager
 from bs4 import BeautifulSoup
 from PIL import Image
-from PIL.ExifTags import TAGS
+
+if __name__ == "__main__":
+    func = {
+        'www.instagram.com' : instagram_dl,
+        'youtu.be' : youtube,
+        'com.termux' : rename_jpeg
+    }
+    
+    if len(sys.argv) < 2:
+        sys.exit(1)
+    
+    url = sys.argv[1]
+    host = urlparse(url).netloc
+    if host in func:
+        func[host](url)
+
 
 def youtube(url):
     print('uplpad to gmusic[0] or save video[1]?')
@@ -68,8 +84,7 @@ def youtube(url):
         return
 
 
-def instagram(url):
-    instagram_dl.get(url, '/sdcard/Download')
+def instagram_dl(url):
     resp = requests.get(url)
     if resp.status_code != requests.codes.ok:
         return resp.status_code
@@ -84,32 +99,12 @@ def instagram(url):
     fname = urlparse(url).path.split('/')[2]
     ext = mimetypes.guess_all_extensions(resp.headers['content-type'])[-1]
     
-    (Path(path) / (fname + ext)).write_bytes(resp.content)
+    (Path('/sdcard/Picture/Instagram') / (fname + ext)).write_bytes(resp.content)
 
 
-def rename_jpeg(path, regex)
-    for file in Path(path).iterdir():
-    	if not re.match(regex, file.name):
-	    	continue
-    	else:
-            with Image.open(p) as img:
-                for k, v in img._getexif().items():
-                    if TAGS.get(k) == 'DateTimeOriginal':
-                        p.rename(p.with_name(re.sub(':| ', '', v) + p.suffix))
-
-
-
-if __name__ == "__main__":
-    func = {
-        'www.instagram.com' : instagram,
-        'youtu.be' : youtube,
-        'com.termux' : rename_jpeg
-    }
-    
-    if len(sys.argv) < 2:
-        sys.exit(1)
-    
-    url = sys.argv[1]
-    host = urlparse(url).netloc
-    if host in func:
-        func[host](url)
+def rename_jpeg(url):
+    patt = re.compile(r':| ')
+    for file in Path('/sdcard/DCIM').glob('**/DSC*.JPG')
+    	img  = Image.open(p)
+        date = img._getexif()[0x9003]
+        p.rename(p.with_name(patt.sub(date)) + p.suffix))
