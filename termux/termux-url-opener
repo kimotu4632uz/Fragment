@@ -4,6 +4,7 @@ import re
 import mimetypes
 from pathlib import Path
 from urllib.parse import urlparse
+from io import BytesIO
 
 import requests
 from youtube_dl import YoutubeDL
@@ -13,21 +14,7 @@ import ffmpeg
 from gmusicapi import Musicmanager
 from bs4 import BeautifulSoup
 from PIL import Image
-
-if __name__ == "__main__":
-    func = {
-        'www.instagram.com' : instagram_dl,
-        'youtu.be' : youtube,
-        'com.termux' : rename_jpeg
-    }
-    
-    if len(sys.argv) < 2:
-        sys.exit(1)
-    
-    url = sys.argv[1]
-    host = urlparse(url).netloc
-    if host in func:
-        func[host](url)
+import img2pdf
 
 
 def youtube(url):
@@ -104,7 +91,48 @@ def instagram_dl(url):
 
 def rename_jpeg(url):
     patt = re.compile(r':| ')
-    for file in Path('/sdcard/DCIM').glob('**/DSC*.JPG')
-    	img  = Image.open(p)
+    for file in Path('/sdcard/DCIM').glob('**/DSC*.JPG'):
+        img  = Image.open(file)
         date = img._getexif()[0x9003]
-        p.rename(p.with_name(patt.sub(date)) + p.suffix))
+        file.rename(file.with_name(patt.sub('', date) + file.suffix))
+
+
+def html2pdf(url):
+    resp = requests.get(url)
+    if resp.status_code != requests.codes.ok:
+        return resp.status_code
+    
+    soup = BeautifulSoup(resp.text, 'html.parser')
+    imgs = []
+    for img in soup.find_all('img'):
+        resp = requests.get(img['src'])
+        if resp.status_code == requests.codes.ok:
+            img = Image.open(BytesIO(resp.content))
+            if img.mode == 'RGBA':
+                out = BytesIO()
+                fmt = mimetypes.guess_all_extensions(resp.headers['content-type'])[-1][1:]
+                img.convert('RGB').save(out, format=fmt)
+                imgs.append(out.getvalue())
+            else:
+                imgs.append(resp.content)
+        
+    (Path('/sdcard/Download') / (urlparse(url).path.split('/')[-1] + '.pdf')).write_bytes(img2pdf.convert(imgs))
+
+
+if __name__ == "__main__":
+    func = {
+        'www.instagram.com' : instagram_dl,
+        'youtu.be' : youtube,
+        'com.termux' : rename_jpeg
+    }
+    
+    if len(sys.argv) < 2:
+        sys.exit(1)
+    
+    url = sys.argv[1]
+    host = urlparse(url).netloc
+    if host in func:
+        func[host](url)
+    else:
+        html2pdf(url)
+
