@@ -5,6 +5,7 @@ import mimetypes
 from pathlib import Path
 from urllib.parse import urlparse
 from io import BytesIO
+import subprocess
 
 import requests
 from youtube_dl import YoutubeDL
@@ -89,12 +90,19 @@ def instagram_dl(url):
     (Path('/sdcard/Picture/Instagram') / (fname + ext)).write_bytes(resp.content)
 
 
-def rename_jpeg(url):
+def rename_jpeg():
     patt = re.compile(r':| ')
     for file in Path('/sdcard/DCIM').glob('**/DSC*.JPG'):
         img  = Image.open(file)
         date = img._getexif()[0x9003]
         file.rename(file.with_name(patt.sub('', date) + file.suffix))
+
+
+def daily(url):
+	rename_jpeg()
+	res = subprocess.call(['rclone', 'move', '/sdcard/Picture/*', 'remote:/Picture'])
+	if res != 0:
+		sys.exit(res)
 
 
 def html2pdf(url):
@@ -123,7 +131,7 @@ if __name__ == "__main__":
     func = {
         'www.instagram.com' : instagram_dl,
         'youtu.be' : youtube,
-        'com.termux' : rename_jpeg
+        'com.termux' : daily
     }
     
     if len(sys.argv) < 2:
