@@ -4,7 +4,6 @@ import re
 import mimetypes
 from pathlib import Path
 from urllib.parse import urlparse
-from io import BytesIO
 import subprocess
 
 import requests
@@ -14,8 +13,8 @@ from mutagen.id3 import ID3, APIC
 import ffmpeg
 from gmusicapi import Musicmanager
 from bs4 import BeautifulSoup
-from PIL import Image
 import img2pdf
+from PIL import Image
 
 
 def youtube(url):
@@ -100,9 +99,12 @@ def rename_jpeg():
 
 def daily(url):
 	rename_jpeg()
-	res = subprocess.call(['rclone', 'move', '/sdcard/Picture/*', 'remote:/Picture'])
+	res = subprocess.call(['rclone', 'move', '/sdcard/Pictures/', 'upload_pic:/Pictures'])
+	res1 = subprocess.call(['rclone', 'move', '/sdcard/pixiv', 'upload_pic:/Pictures/Pixiv'])
 	if res != 0:
 		sys.exit(res)
+	if res1 != 0:
+	    sys.exit(res1)
 
 
 def html2pdf(url):
@@ -112,19 +114,25 @@ def html2pdf(url):
     
     soup = BeautifulSoup(resp.text, 'html.parser')
     imgs = []
-    for img in soup.find_all('img'):
-        resp = requests.get(img['src'])
-        if resp.status_code == requests.codes.ok:
-            img = Image.open(BytesIO(resp.content))
-            if img.mode == 'RGBA':
-                out = BytesIO()
-                fmt = mimetypes.guess_all_extensions(resp.headers['content-type'])[-1][1:]
-                img.convert('RGB').save(out, format=fmt)
-                imgs.append(out.getvalue())
-            else:
-                imgs.append(resp.content)
+    
+    for tag in soup.find_all(['img', 'a']):
+        if tag.name == 'img':
+            img = tag['src']
+        else:
+            img = tag['href']
         
-    (Path('/sdcard/Download') / (urlparse(url).path.split('/')[-1] + '.pdf')).write_bytes(img2pdf.convert(imgs))
+        if mimetypes.guess_type(img)[0] == 'image/jpeg':
+            resp = requests.get(img)
+            if resp.status_code == requests.codes.ok:
+                imgs.append(resp.content)
+    
+    names = urlparse(url).path.split('/')
+    if names[-1] == '':
+        name = names[-2]
+    else:
+        name = names[-1]
+    
+    (Path('/sdcard/Download') / (name + '.pdf')).write_bytes(img2pdf.convert(imgs))
 
 
 if __name__ == "__main__":
