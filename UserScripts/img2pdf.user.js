@@ -1,11 +1,13 @@
 // ==UserScript==
 // @name         img2pdf
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      1.0.0
 // @description  save jpeg and png in the site to the pdf
 // @author       kimotu
 // @include      https://*
 // @grant        none
+// @updateURL    https://github.com/kimotu4632uz/Fragment/raw/master/UserScripts/img2pdf.user.js
+// @downloadURL  https://github.com/kimotu4632uz/Fragment/raw/master/UserScripts/img2pdf.user.js
 
 // @require https://code.jquery.com/jquery-3.5.1.min.js
 // @require https://github.com/foliojs/pdfkit/releases/download/v0.11.0/pdfkit.standalone.js
