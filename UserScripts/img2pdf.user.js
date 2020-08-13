@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         img2pdf
 // @namespace    http://tampermonkey.net/
-// @version      1.0.8
+// @version      1.1.0
 // @description  save jpeg and png in the site to the pdf
 // @author       kimotu
 // @include      https://*
@@ -75,8 +75,6 @@
     var urls = groups[0].sort((a,b) => 
         a.match(/\d+/g).join('') - b.match(/\d+/g).join('')
     );
-    console.log(groups);
-    console.log(urls);
 
     var pdf = new PDFDocument({autoFirstPage:false});
     const stream = pdf.pipe(blobStream());
