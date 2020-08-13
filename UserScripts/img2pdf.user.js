@@ -25,20 +25,20 @@
     $('a[href]').filter((i,e) => {
         let ext = e['href'].split('.').pop();
         return ext == "jpeg" || ext == "jpg" || ext == "png";
-    }).each((i,e) =>
+    }).each((i,e) => {
         if (!urls.includes(e['href'])) {
             urls.push(e['href']);
         }
-    );
+    });
 
     $('img[src]').filter((i,e) => {
         let ext = e['src'].split('.').pop();
         return ext == "jpeg" || ext == "jpg" || ext == "png";
-    }).each((i,e) =>
+    }).each((i,e) => {
         if (!urls.includes(e['src'])) {
             urls.push(e['src']);
         }
-    );
+    });
 
     var urldic = {};
 
