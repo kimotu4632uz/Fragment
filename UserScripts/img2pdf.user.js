@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         img2pdf
 // @namespace    http://tampermonkey.net/
-// @version      1.0.6
+// @version      1.0.7
 // @description  save jpeg and png in the site to the pdf
 // @author       kimotu
 // @include      https://*
