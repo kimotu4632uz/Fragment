@@ -54,14 +54,14 @@
         if (grouped.includes(url)) {
             continue;
         }
-        
+
         let temp = new RegExp('^' + url.replace(/\d+/g, '\\d+') + '$', 'u');
         var comp = [];
-        
+
         for (let comped in urldic) {
             if (temp.test(comped)) {
-                comp.push(comped);
-                grouped.push(urldic[comped]);
+                comp.push(urldic[comped]);
+                grouped.push(comped);
             }
         }
 
