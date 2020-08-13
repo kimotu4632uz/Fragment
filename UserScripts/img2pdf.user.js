@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         img2pdf
 // @namespace    http://tampermonkey.net/
-// @version      1.0.4
+// @version      1.0.5
 // @description  save jpeg and png in the site to the pdf
 // @author       kimotu
 // @include      https://*
@@ -74,7 +74,7 @@
         return 0;
     });
 
-    let urls = groups[0].sort();
+    var urls = groups[0].sort();
     console.log(groups);
     console.log(urls);
 
