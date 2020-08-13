@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         img2pdf
 // @namespace    http://tampermonkey.net/
-// @version      1.0.7
+// @version      1.0.8
 // @description  save jpeg and png in the site to the pdf
 // @author       kimotu
 // @include      https://*
@@ -85,6 +85,8 @@
     var ctx = canvas.getContext("2d");
     var img = new Image();
 
+    let fst = true;
+
     for (let url of urls) {
         img.src = url;
         canvas.width = img.width;
@@ -101,7 +103,13 @@
         }
 
         pdf.addPage({size: [img.width, img.height]});
-        pdf.image(dataurl, 0, 0);
+
+        if (fst) {
+            pdf.image(dataurl, 0, 0).link(0, 0, img.width, img.height, window.location.href);
+            fst = false;
+        } else {
+            pdf.image(dataurl, 0, 0);
+        }
     }
 
     pdf.end();
