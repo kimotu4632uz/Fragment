@@ -44,6 +44,8 @@
 
     for (let url of urls) {
         let parts = new URL(url);
+        console.log(url);
+        console.log(parts);
         urldic[parts.pathname.split('/').pop()] = url;
     }
 
