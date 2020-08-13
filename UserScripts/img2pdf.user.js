@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         img2pdf
 // @namespace    http://tampermonkey.net/
-// @version      1.0.3
+// @version      1.0.4
 // @description  save jpeg and png in the site to the pdf
 // @author       kimotu
 // @include      https://*
@@ -44,15 +44,13 @@
 
     for (let url of urls) {
         let parts = new URL(url);
-        console.log(url);
-        console.log(parts);
         urldic[parts.pathname.split('/').pop()] = url;
     }
 
     var groups = [];
     var grouped = [];
 
-    for (let url of urls) {
+    for (let url in urldic) {
         if (grouped.includes(url)) {
             continue;
         }
@@ -60,10 +58,10 @@
         let temp = new RegExp('^' + url.replace(/\d+/g, '\\d+') + '$', 'u');
         var comp = [];
         
-        for (let comped of urls) {
+        for (let comped in urldic) {
             if (temp.test(comped)) {
                 comp.push(comped);
-                grouped.push(comped);
+                grouped.push(urldic[comped]);
             }
         }
 
@@ -76,11 +74,9 @@
         return 0;
     });
 
+    let urls = groups[0].sort();
     console.log(groups);
-    var urls = [];
-    for (let file of groups[0]) {
-        urls.push(urldic[file]);
-    }
+    console.log(urls);
 
     var pdf = new PDFDocument({autoFirstPage:false});
     const stream = pdf.pipe(blobStream());
