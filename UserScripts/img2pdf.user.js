@@ -68,13 +68,13 @@
         groups.push(comp);
     }
 
-    groups.sort((a,b) => {
-        if (a.length > b.length) return -1;
-        if (a.length < b.length) return 1;
-        return 0;
-    });
+    groups.sort((a,b) => 
+        b.length - a.length
+    );
 
-    var urls = groups[0].sort();
+    var urls = groups[0].sort((a,b) => 
+        a.match(/\d+/g).join('') - b.match(/\d+/g).join('')
+    );
     console.log(groups);
     console.log(urls);
 
