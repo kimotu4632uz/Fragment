@@ -26,15 +26,58 @@
         let ext = e['href'].split('.').pop();
         return ext == "jpeg" || ext == "jpg" || ext == "png";
     }).each((i,e) =>
-        urls.push(e['href'])
+        if (!urls.includes(e['href'])) {
+            urls.push(e['href']);
+        }
     );
 
     $('img[src]').filter((i,e) => {
         let ext = e['src'].split('.').pop();
         return ext == "jpeg" || ext == "jpg" || ext == "png";
     }).each((i,e) =>
-        urls.push(e['src'])
+        if (!urls.includes(e['src'])) {
+            urls.push(e['src']);
+        }
     );
+
+    var urldic = {};
+
+    for (let url of urls) {
+        let parts = new URL(url);
+        urldic[parts.pathname.split('/').pop()] = url;
+    }
+
+    var groups = [];
+    var grouped = [];
+
+    for (let url of urls) {
+        if (grouped.includes(url)) {
+            continue;
+        }
+        
+        let temp = url.replace(/(\d)+/g, '(\\d)+');
+        var comp = [];
+        
+        for (let it of urls) {
+            if (it.test(temp)) {
+                comp.push(it);
+                grouped.push(it);
+            }
+        }
+
+        groups.push(comp);
+    }
+
+    groups.sort((a,b) => {
+        if (a.length > b.length) return -1;
+        if (a.length < b.length) return 1;
+        return 0;
+    });
+
+    var urls = [];
+    for (let file of groups[0]) {
+        urls.push(urldic[file]);
+    }
 
     var pdf = new PDFDocument({autoFirstPage:false});
     const stream = pdf.pipe(blobStream());
