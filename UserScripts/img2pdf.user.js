@@ -55,13 +55,13 @@
             continue;
         }
         
-        let temp = url.replace(/(\d)+/g, '(\\d)+');
+        let temp = new RegExp('^' + url.replace(/\d+/g, '\\d+') + '$', 'u');
         var comp = [];
         
-        for (let it of urls) {
-            if (it.test(temp)) {
-                comp.push(it);
-                grouped.push(it);
+        for (let comped of urls) {
+            if (temp.test(comped)) {
+                comp.push(comped);
+                grouped.push(comped);
             }
         }
 
@@ -74,6 +74,7 @@
         return 0;
     });
 
+    console.log(groups);
     var urls = [];
     for (let file of groups[0]) {
         urls.push(urldic[file]);
