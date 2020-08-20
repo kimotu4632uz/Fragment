@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Risyu to .ics
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.3
 // @description  saidai riyuuu page to icalender format file
 // @author       kimotu
 // @match        https://risyu.saitama-u.ac.jp/portal/StudentApp/Regist/RegistList.aspx
@@ -36,8 +36,9 @@
                 if (sbj.tagName === 'DIV') {
                     let ct = sbj.id.split('_')[5];
 
+                    console.log(sbj);
                     let sbjname = sbj.getElementById(`ctl00_phContents_rrMain_ttTable_lct${day}${i}_${ct}_lblSbjName`);
-                    let teacher = sbj.getElementById(`ctl00_phContents_rrMain_ttTable_lct${day}${i}_${ct}_lblStaffName`)
+                    let teacher = sbj.getElementById(`ctl00_phContents_rrMain_ttTable_lct${day}${i}_${ct}_lblStaffName`);
 
                     if (sbjname.children.length > 0) {
                         subjects.push({ "name": sbjname.firstElementChild.innerText.split(/\n/)[0], "teacher": teacher.innerText, "day": days.indexOf(day) + 1, "time": i });
