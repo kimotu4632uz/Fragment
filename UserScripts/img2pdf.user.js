@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         img2pdf
 // @namespace    http://tampermonkey.net/
-// @version      1.1.0
+// @version      1.1.1
 // @description  save jpeg and png in the site to the pdf
 // @author       kimotu
 // @include      https://*
@@ -40,41 +40,41 @@
         }
     });
 
-    var urldic = {};
+    //var urldic = {};
 
-    for (let url of urls) {
-        let parts = new URL(url);
-        urldic[parts.pathname.split('/').pop()] = url;
-    }
+    //for (let url of urls) {
+    //    let parts = new URL(url);
+    //    urldic[parts.pathname.split('/').pop()] = url;
+    //}
 
-    var groups = [];
-    var grouped = [];
+    //var groups = [];
+    //var grouped = [];
 
-    for (let url in urldic) {
-        if (grouped.includes(url)) {
-            continue;
-        }
+    //for (let url in urldic) {
+    //    if (grouped.includes(url)) {
+    //        continue;
+    //    }
 
-        let temp = new RegExp('^' + url.replace(/\d+/g, '\\d+') + '$', 'u');
-        var comp = [];
+    //    let temp = new RegExp('^' + url.replace(/\d+/g, '\\d+') + '$', 'u');
+    //    var comp = [];
 
-        for (let comped in urldic) {
-            if (temp.test(comped)) {
-                comp.push(urldic[comped]);
-                grouped.push(comped);
-            }
-        }
+    //    for (let comped in urldic) {
+    //        if (temp.test(comped)) {
+    //            comp.push(urldic[comped]);
+    //            grouped.push(comped);
+    //        }
+    //    }
 
-        groups.push(comp);
-    }
+    //    groups.push(comp);
+    //}
 
-    groups.sort((a,b) => 
-        b.length - a.length
-    );
+    //groups.sort((a,b) => 
+    //    b.length - a.length
+    //);
 
-    var urls = groups[0].sort((a,b) => 
-        a.match(/\d+/g).join('') - b.match(/\d+/g).join('')
-    );
+    //var urls = groups[0].sort((a,b) => 
+    //    a.match(/\d+/g).join('') - b.match(/\d+/g).join('')
+    //);
 
     var pdf = new PDFDocument({autoFirstPage:false});
     const stream = pdf.pipe(blobStream());
@@ -100,13 +100,15 @@
             dataurl = canvas.toDataURL();
         }
 
-        pdf.addPage({size: [img.width, img.height]});
+        if (img.height > 700) {
+            pdf.addPage({size: [img.width, img.height]});
 
-        if (fst) {
-            pdf.image(dataurl, 0, 0).link(0, 0, img.width, img.height, window.location.href);
-            fst = false;
-        } else {
-            pdf.image(dataurl, 0, 0);
+            if (fst) {
+                pdf.image(dataurl, 0, 0).link(0, 0, img.width, img.height, window.location.href);
+                fst = false;
+            } else {
+                pdf.image(dataurl, 0, 0);
+            }
         }
     }
 
