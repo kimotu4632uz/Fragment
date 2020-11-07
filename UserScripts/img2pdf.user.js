@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         img2pdf
 // @namespace    http://tampermonkey.net/
-// @version      1.1.1
+// @version      1.2.0
 // @description  save jpeg and png in the site to the pdf
 // @author       kimotu
 // @include      https://*
@@ -15,6 +15,17 @@
 
 // ==/UserScript==
 
+function setLoadAllCallback(elems, callback) {
+    var count = 0;
+    for (let elem of elems) {
+        elem.onload = () => {
+            count++;
+            if (count == elems.length) {
+                callback(elems);
+            }
+        };
+    }
+}
 
 (() => {
     'use strict';
@@ -40,82 +51,58 @@
         }
     });
 
-    //var urldic = {};
-
-    //for (let url of urls) {
-    //    let parts = new URL(url);
-    //    urldic[parts.pathname.split('/').pop()] = url;
-    //}
-
-    //var groups = [];
-    //var grouped = [];
-
-    //for (let url in urldic) {
-    //    if (grouped.includes(url)) {
-    //        continue;
-    //    }
-
-    //    let temp = new RegExp('^' + url.replace(/\d+/g, '\\d+') + '$', 'u');
-    //    var comp = [];
-
-    //    for (let comped in urldic) {
-    //        if (temp.test(comped)) {
-    //            comp.push(urldic[comped]);
-    //            grouped.push(comped);
-    //        }
-    //    }
-
-    //    groups.push(comp);
-    //}
-
-    //groups.sort((a,b) => 
-    //    b.length - a.length
-    //);
-
-    //var urls = groups[0].sort((a,b) => 
-    //    a.match(/\d+/g).join('') - b.match(/\d+/g).join('')
-    //);
-
     var pdf = new PDFDocument({autoFirstPage:false});
     const stream = pdf.pipe(blobStream());
 
     var canvas = document.createElement("canvas");
     var ctx = canvas.getContext("2d");
-    var img = new Image();
 
     let fst = true;
 
     for (let url of urls) {
-        img.src = url;
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
-
-        let ext = url.split('.').pop();
-        var dataurl = "";
-
-        if (ext == "jpg" || ext == "jpeg") {
-            dataurl = canvas.toDataURL('image/jpeg');
-        } else {
-            dataurl = canvas.toDataURL();
-        }
-
-        if (img.height > 700) {
-            pdf.addPage({size: [img.width, img.height]});
-
-            if (fst) {
-                pdf.image(dataurl, 0, 0).link(0, 0, img.width, img.height, window.location.href);
-                fst = false;
-            } else {
-                pdf.image(dataurl, 0, 0);
-            }
-        }
+        var img = new Image();
+        imgs.push(img);
     }
 
-    pdf.end();
+    setLoadAllCallback(imgs, (elems) => {
+        for (let img of elems) {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
 
-    stream.on('finish', () =>
-        window.open(stream.toBlobURL('application/pdf'))
-    );
+            let ext = img.src.split('.').pop();
+            var dataurl = "";
+
+            if (ext == "jpg" || ext == "jpeg") {
+                dataurl = canvas.toDataURL('image/jpeg');
+            } else {
+                dataurl = canvas.toDataURL();
+            }
+
+
+            if (img.height > 700) {
+                pdf.addPage({size: [img.width, img.height]});
+
+                if (fst) {
+                    pdf.image(dataurl, 0, 0).link(0, 0, img.width, img.height, window.location.href);
+                    fst = false;
+                } else {
+                    pdf.image(dataurl, 0, 0);
+                }
+            }
+        }
+
+        pdf.end();
+
+        stream.on('finish', () =>
+            window.open(stream.toBlobURL('application/pdf'))
+        );
+    });
+
+    for (var i=0;i<urls.length; i++) {
+        imgs[i].src = urls[i];
+    }
 
 })();
+
