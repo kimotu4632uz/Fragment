@@ -1,0 +1,128 @@
+--- a/pass	2020-11-12 17:23:00.150370700 +0900
++++ b/pass	2020-11-12 17:23:37.690000000 +0900
+@@ -7,9 +7,9 @@ umask "${PASSWORD_STORE_UMASK:-077}"
+ set -o pipefail
+ 
+ GPG_OPTS=( $PASSWORD_STORE_GPG_OPTS "--quiet" "--yes" "--compress-algo=none" "--no-encrypt-to" )
+-GPG="gpg"
++GPG="gpg.exe"
+ export GPG_TTY="${GPG_TTY:-$(tty 2>/dev/null)}"
+-which gpg2 &>/dev/null && GPG="gpg2"
++#which gpg2 &>/dev/null && GPG="gpg2"
+ [[ -n $GPG_AGENT_INFO || $GPG == "gpg2" ]] && GPG_OPTS+=( "--batch" "--use-agent" )
+ 
+ PREFIX="${PASSWORD_STORE_DIR:-$HOME/.password-store}"
+@@ -58,7 +58,7 @@ die() {
+ verify_file() {
+ 	[[ -n $PASSWORD_STORE_SIGNING_KEY ]] || return 0
+ 	[[ -f $1.sig ]] || die "Signature for $1 does not exist."
+-	local fingerprints="$($GPG $PASSWORD_STORE_GPG_OPTS --verify --status-fd=1 "$1.sig" "$1" 2>/dev/null | sed -n 's/^\[GNUPG:\] VALIDSIG \([A-F0-9]\{40\}\) .* \([A-F0-9]\{40\}\)$/\1\n\2/p')"
++	local fingerprints="$($GPG $PASSWORD_STORE_GPG_OPTS --verify --status-fd=1 $(wslpath -m "$1.sig") $(wslpath -m "$1") 2>/dev/null | sed -n 's/^\[GNUPG:\] VALIDSIG \([A-F0-9]\{40\}\) .* \([A-F0-9]\{40\}\)$/\1\n\2/p')"
+ 	local fingerprint found=0
+ 	for fingerprint in $PASSWORD_STORE_SIGNING_KEY; do
+ 		[[ $fingerprint =~ ^[A-F0-9]{40}$ ]] || continue
+@@ -125,11 +125,11 @@ reencrypt_path() {
+ 			done
+ 			gpg_keys="$($GPG $PASSWORD_STORE_GPG_OPTS --list-keys --with-colons "${GPG_RECIPIENTS[@]}" | sed -n 's/^sub:[^:]*:[^:]*:[^:]*:\([^:]*\):[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:[a-zA-Z]*e[a-zA-Z]*:.*/\1/p' | LC_ALL=C sort -u)"
+ 		fi
+-		current_keys="$(LC_ALL=C $GPG $PASSWORD_STORE_GPG_OPTS -v --no-secmem-warning --no-permission-warning --decrypt --list-only --keyid-format long "$passfile" 2>&1 | sed -n 's/^gpg: public key is \([A-F0-9]\+\)$/\1/p' | LC_ALL=C sort -u)"
++		current_keys="$(LC_ALL=C $GPG $PASSWORD_STORE_GPG_OPTS -v --no-secmem-warning --no-permission-warning --decrypt --list-only --keyid-format long $(wslpath -m "$passfile") 2>&1 | sed -n 's/^gpg: public key is \([A-F0-9]\+\)$/\1/p' | LC_ALL=C sort -u)"
+ 
+ 		if [[ $gpg_keys != "$current_keys" ]]; then
+ 			echo "$passfile_display: reencrypting to ${gpg_keys//$'\n'/ }"
+-			$GPG -d "${GPG_OPTS[@]}" "$passfile" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile_temp" "${GPG_OPTS[@]}" &&
++			$GPG -d "${GPG_OPTS[@]}" $(wslpath -m "$passfile") | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o $(wslpath -m "$passfile_temp") "${GPG_OPTS[@]}" &&
+ 			mv "$passfile_temp" "$passfile" || rm -f "$passfile_temp"
+ 		fi
+ 		prev_gpg_recipients="${GPG_RECIPIENTS[*]}"
+@@ -333,8 +333,8 @@ cmd_init() {
+ 			for key in $PASSWORD_STORE_SIGNING_KEY; do
+ 				signing_keys+=( --default-key $key )
+ 			done
+-			$GPG "${GPG_OPTS[@]}" "${signing_keys[@]}" --detach-sign "$gpg_id" || die "Could not sign .gpg_id."
+-			key="$($GPG --verify --status-fd=1 "$gpg_id.sig" "$gpg_id" 2>/dev/null | sed -n 's/^\[GNUPG:\] VALIDSIG [A-F0-9]\{40\} .* \([A-F0-9]\{40\}\)$/\1/p')"
++			$GPG "${GPG_OPTS[@]}" "${signing_keys[@]}" --detach-sign $(wslpath -m "$gpg_id") || die "Could not sign .gpg_id."
++			key="$($GPG --verify --status-fd=1 $(wslpath -m "$gpg_id.sig") $(wslpath -m "$gpg_id") 2>/dev/null | sed -n 's/^\[GNUPG:\] VALIDSIG [A-F0-9]\{40\} .* \([A-F0-9]\{40\}\)$/\1/p')"
+ 			[[ -n $key ]] || die "Signing of .gpg_id unsuccessful."
+ 			git_add_file "$gpg_id.sig" "Signing new GPG id with ${key//[$IFS]/,}."
+ 		fi
+@@ -363,11 +363,11 @@ cmd_show() {
+ 	check_sneaky_paths "$path"
+ 	if [[ -f $passfile ]]; then
+ 		if [[ $clip -eq 0 && $qrcode -eq 0 ]]; then
+-			pass="$($GPG -d "${GPG_OPTS[@]}" "$passfile" | $BASE64)" || exit $?
++			pass="$($GPG -d "${GPG_OPTS[@]}" $(wslpath -m "$passfile") | $BASE64)" || exit $?
+ 			echo "$pass" | $BASE64 -d
+ 		else
+ 			[[ $selected_line =~ ^[0-9]+$ ]] || die "Clip location '$selected_line' is not a number."
+-			pass="$($GPG -d "${GPG_OPTS[@]}" "$passfile" | tail -n +${selected_line} | head -n 1)" || exit $?
++			pass="$($GPG -d "${GPG_OPTS[@]}" $(wslpath -m "$passfile") | tail -n +${selected_line} | head -n 1)" || exit $?
+ 			[[ -n $pass ]] || die "There is no password to put on the clipboard at line ${selected_line}."
+ 			if [[ $clip -eq 1 ]]; then
+ 				clip "$pass" "$path"
+@@ -400,7 +400,7 @@ cmd_grep() {
+ 	[[ $# -lt 1 ]] && die "Usage: $PROGRAM $COMMAND [GREPOPTIONS] search-string"
+ 	local passfile grepresults
+ 	while read -r -d "" passfile; do
+-		grepresults="$($GPG -d "${GPG_OPTS[@]}" "$passfile" | grep --color=always "$@")"
++		grepresults="$($GPG -d "${GPG_OPTS[@]}" $(wslpath -m "$passfile") | grep --color=always "$@")"
+ 		[[ $? -ne 0 ]] && continue
+ 		passfile="${passfile%.gpg}"
+ 		passfile="${passfile#$PREFIX/}"
+@@ -438,7 +438,7 @@ cmd_insert() {
+ 	if [[ $multiline -eq 1 ]]; then
+ 		echo "Enter contents of $path and press Ctrl+D when finished:"
+ 		echo
+-		$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" || die "Password encryption aborted."
++		$GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o $(wslpath -m "$passfile") "${GPG_OPTS[@]}" || die "Password encryption aborted."
+ 	elif [[ $noecho -eq 1 ]]; then
+ 		local password password_again
+ 		while true; do
+@@ -447,7 +447,7 @@ cmd_insert() {
+ 			read -r -p "Retype password for $path: " -s password_again || exit 1
+ 			echo
+ 			if [[ $password == "$password_again" ]]; then
+-				echo "$password" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" || die "Password encryption aborted."
++				echo "$password" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o $(wslpath -m "$passfile") "${GPG_OPTS[@]}" || die "Password encryption aborted."
+ 				break
+ 			else
+ 				die "Error: the entered passwords do not match."
+@@ -456,7 +456,7 @@ cmd_insert() {
+ 	else
+ 		local password
+ 		read -r -p "Enter password for $path: " -e password
+-		echo "$password" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" || die "Password encryption aborted."
++		echo "$password" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o $(wslpath -m "$passfile") "${GPG_OPTS[@]}" || die "Password encryption aborted."
+ 	fi
+ 	git_add_file "$passfile" "Add given password for $path to store."
+ }
+@@ -476,13 +476,13 @@ cmd_edit() {
+ 
+ 	local action="Add"
+ 	if [[ -f $passfile ]]; then
+-		$GPG -d -o "$tmp_file" "${GPG_OPTS[@]}" "$passfile" || exit 1
++		$GPG -d -o "$tmp_file" "${GPG_OPTS[@]}" $(wslpath -m "$passfile") || exit 1
+ 		action="Edit"
+ 	fi
+ 	${EDITOR:-vi} "$tmp_file"
+ 	[[ -f $tmp_file ]] || die "New password not saved."
+-	$GPG -d -o - "${GPG_OPTS[@]}" "$passfile" 2>/dev/null | diff - "$tmp_file" &>/dev/null && die "Password unchanged."
+-	while ! $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" "$tmp_file"; do
++	$GPG -d -o - "${GPG_OPTS[@]}" $(wslpath -m "$passfile") 2>/dev/null | diff - "$tmp_file" &>/dev/null && die "Password unchanged."
++	while ! $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o $(wslpath -m "$passfile") "${GPG_OPTS[@]}" "$tmp_file"; do
+ 		yesno "GPG encryption failed. Would you like to try again?"
+ 	done
+ 	git_add_file "$passfile" "$action password for $path using ${EDITOR:-vi}."
+@@ -518,10 +518,10 @@ cmd_generate() {
+ 	read -r -n $length pass < <(LC_ALL=C tr -dc "$characters" < /dev/urandom)
+ 	[[ ${#pass} -eq $length ]] || die "Could not generate password from /dev/urandom."
+ 	if [[ $inplace -eq 0 ]]; then
+-		echo "$pass" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" || die "Password encryption aborted."
++		echo "$pass" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o $(wslpath -m "$passfile") "${GPG_OPTS[@]}" || die "Password encryption aborted."
+ 	else
+ 		local passfile_temp="${passfile}.tmp.${RANDOM}.${RANDOM}.${RANDOM}.${RANDOM}.--"
+-		if { echo "$pass"; $GPG -d "${GPG_OPTS[@]}" "$passfile" | tail -n +2; } | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile_temp" "${GPG_OPTS[@]}"; then
++		if { echo "$pass"; $GPG -d "${GPG_OPTS[@]}" $(wslpath -m "$passfile") | tail -n +2; } | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o $(wslpath -m "$passfile_temp") "${GPG_OPTS[@]}"; then
+ 			mv "$passfile_temp" "$passfile"
+ 		else
+ 			rm -f "$passfile_temp"
