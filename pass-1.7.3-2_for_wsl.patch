@@ -1,5 +1,5 @@
---- a/pass	2020-11-12 17:23:00.150370700 +0900
-+++ b/pass	2020-11-12 17:23:37.690000000 +0900
+--- a/pass	2020-11-20 21:43:46.810000000 +0900
++++ b/pass	2020-11-20 21:43:13.730000000 +0900
 @@ -7,9 +7,9 @@ umask "${PASSWORD_STORE_UMASK:-077}"
  set -o pipefail
  
@@ -101,15 +101,15 @@
  	local action="Add"
  	if [[ -f $passfile ]]; then
 -		$GPG -d -o "$tmp_file" "${GPG_OPTS[@]}" "$passfile" || exit 1
-+		$GPG -d -o "$tmp_file" "${GPG_OPTS[@]}" $(wslpath -m "$passfile") || exit 1
++		$GPG -d -o $(wslpath -m "${tmp_file%/*}")/"${tmp_file##*/}" "${GPG_OPTS[@]}" $(wslpath -m "$passfile") || exit 1
  		action="Edit"
  	fi
  	${EDITOR:-vi} "$tmp_file"
  	[[ -f $tmp_file ]] || die "New password not saved."
 -	$GPG -d -o - "${GPG_OPTS[@]}" "$passfile" 2>/dev/null | diff - "$tmp_file" &>/dev/null && die "Password unchanged."
 -	while ! $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" "$tmp_file"; do
-+	$GPG -d -o - "${GPG_OPTS[@]}" $(wslpath -m "$passfile") 2>/dev/null | diff - "$tmp_file" &>/dev/null && die "Password unchanged."
-+	while ! $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o $(wslpath -m "$passfile") "${GPG_OPTS[@]}" "$tmp_file"; do
++	$GPG -d -o - "${GPG_OPTS[@]}" $(wslpath -m "${passfile%/*}")/"${passfile##*/}" 2>/dev/null | diff - "$tmp_file" &>/dev/null && die "Password unchanged."
++	while ! $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o $(wslpath -m "$passfile") "${GPG_OPTS[@]}" $(wslpath -m "$tmp_file"); do
  		yesno "GPG encryption failed. Would you like to try again?"
  	done
  	git_add_file "$passfile" "$action password for $path using ${EDITOR:-vi}."
@@ -118,7 +118,7 @@
  	[[ ${#pass} -eq $length ]] || die "Could not generate password from /dev/urandom."
  	if [[ $inplace -eq 0 ]]; then
 -		echo "$pass" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile" "${GPG_OPTS[@]}" || die "Password encryption aborted."
-+		echo "$pass" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o $(wslpath -m "$passfile") "${GPG_OPTS[@]}" || die "Password encryption aborted."
++		echo "$pass" | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o $(wslpath -m "$PREFIX")"/$path.gpg" "${GPG_OPTS[@]}" || die "Password encryption aborted."
  	else
  		local passfile_temp="${passfile}.tmp.${RANDOM}.${RANDOM}.${RANDOM}.${RANDOM}.--"
 -		if { echo "$pass"; $GPG -d "${GPG_OPTS[@]}" "$passfile" | tail -n +2; } | $GPG -e "${GPG_RECIPIENT_ARGS[@]}" -o "$passfile_temp" "${GPG_OPTS[@]}"; then
