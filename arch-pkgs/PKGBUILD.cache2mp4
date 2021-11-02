@@ -1,0 +1,24 @@
+pkgname=cache2mp4
+pkgver=0.2.0
+pkgrel=1
+pkgdesc="generate mp4 from chromium cache."
+url="https://github.com/kimotu4632uz/cache2mp4"
+arch=('x86_64' 'i686')
+license=('GPLv3')
+depends=('ffmpeg')
+makedepends=('rust')
+conflicts=()
+replaces=()
+backup=()
+source=("https://github.com/kimotu4632uz/${pkgname}/archive/refs/tags/v${pkgver}.tar.gz")
+md5sums=('f7c4ad3c74462c8dd9e3f9b5c391f1df')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  cargo build --release
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  install -Dm755 "target/release/${pkgname}" "${pkgdir}/usr/bin/${pkgname}"
+}

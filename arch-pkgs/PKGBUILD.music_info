@@ -1,0 +1,25 @@
+pkgname=music_info
+pkgver=0.3.0
+pkgrel=1
+pkgdesc="read, write and edit tags and cover art from music file."
+url="https://github.com/kimotu4632uz/music_info"
+arch=('x86_64')
+license=('GPLv3')
+depends=('taglib')
+makedepends=('rust' 'clang')
+conflicts=()
+replaces=()
+backup=()
+source=("music_info-0.3.0.tar.gz")
+md5sums=('0b20b5c10045a32e13744a299e4c2752')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  cargo build --release
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  install -Dm755 "target/release/${pkgname}" "${pkgdir}/usr/bin/${pkgname}"
+}
+
