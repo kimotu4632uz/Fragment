@@ -1,0 +1,11 @@
+--- a/disc_win32.c	2021-05-03 16:45:44.693190900 +0900
++++ b/disc_win32.c	2021-05-03 16:46:02.603190900 +0900
+@@ -34,7 +34,7 @@
+ #if defined(__CYGWIN__)
+ #include <ntddcdrm.h>
+ #elif defined(__MINGW32__)
+-#include <ddk/ntddcdrm.h>
++#include <ntddcdrm.h>
+ #else
+ #include "ntddcdrm.h"
+ #endif

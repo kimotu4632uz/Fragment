@@ -1,0 +1,5 @@
+compile discid.exe by using docker
+docker image: mmozeiko/mingw-w64 
+packages included in the image: mingw-w64, build-essential
+
+build command: docker run --rm -it -v $PWD:/mnt mmozeiko/mingw-w64 ./build.sh
