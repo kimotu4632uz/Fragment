@@ -1,0 +1,3 @@
+build Ricty font with Nerd Font.
+command: docker run --rm -it -v $PWD:/mnt -w /mnt debian:bullseye-slim ./build.sh
+
