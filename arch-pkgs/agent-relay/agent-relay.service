@@ -1,0 +1,10 @@
+[Unit]
+Description=relay gpg and ssh agent
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/agent-relay.sh
+
+[Install]
+WantedBy=default.target
+

@@ -1,0 +1,20 @@
+pkgname=agent-relay
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="relay windows gpg-agent and ssh-agent to wsl"
+url=""
+arch=('x86_64')
+license=('GPLv3')
+depends=('gnupg' 'openssh' 'socat' 'genie-systemd')
+conflicts=()
+replaces=()
+backup=()
+source=("agent-relay.sh" "agent-relay.service")
+md5sums=("e4f41b11008d9f16660a402fc6fd5f1d" "826b847af84e0338d0c057edf6d52bb7")
+
+package() {
+  cd "${srcdir}"
+  install -Dm755 "agent-relay.sh" "${pkgdir}/usr/bin/agent-relay.sh"
+  install -Dm644 "agent-relay.service" "${pkgdir}/usr/lib/systemd/user/agent-relay.service"
+}
+

@@ -1,0 +1,16 @@
+pkgbase = agent-relay
+	pkgdesc = relay windows gpg-agent and ssh-agent to wsl
+	pkgver = 0.1.0
+	pkgrel = 1
+	arch = x86_64
+	license = GPLv3
+	depends = gnupg
+	depends = openssh
+	depends = socat
+	depends = genie-systemd
+	source = agent-relay.sh
+	source = agent-relay.service
+	md5sums = e4f41b11008d9f16660a402fc6fd5f1d
+	md5sums = 826b847af84e0338d0c057edf6d52bb7
+
+pkgname = agent-relay
