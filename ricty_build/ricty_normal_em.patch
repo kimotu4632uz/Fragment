@@ -1,0 +1,23 @@
+--- a/ricty_generator.sh	2021-11-29 20:43:52.586910300 +0900
++++ b/ricty_generator.sh	2021-11-29 20:43:40.925434700 +0900
+@@ -686,13 +686,13 @@ while (i < SizeOf(fontstyle_list))
+     Select(0u003e); Copy(); Select(0uff1e); Paste(); Move(250, 0); SetWidth(1000) # >
+ 
+     # Edit en and em dashes
+-    Print("Edit en and em dashes")
+-    Select(0u2013); Copy()
+-    PasteWithOffset(200, 0); PasteWithOffset(-200, 0)
+-    OverlapIntersect()
+-    Select(0u2014); Copy()
+-    PasteWithOffset(490, 0); PasteWithOffset(-490, 0)
+-    OverlapIntersect()
++#    Print("Edit en and em dashes")
++#    Select(0u2013); Copy()
++#    PasteWithOffset(200, 0); PasteWithOffset(-200, 0)
++#    OverlapIntersect()
++#    Select(0u2014); Copy()
++#    PasteWithOffset(490, 0); PasteWithOffset(-490, 0)
++#    OverlapIntersect()
+ 
+     # Proccess before saving
+     Print("Process before saving (it may take a few minutes)")
