@@ -1,5 +1,5 @@
 pkgname=music_info
-pkgver=0.3.0
+pkgver=0.3.1
 pkgrel=1
 pkgdesc="read, write and edit tags and cover art from music file."
 url="https://github.com/kimotu4632uz/music_info"
@@ -10,8 +10,8 @@ makedepends=('rust' 'clang')
 conflicts=()
 replaces=()
 backup=()
-source=("music_info-0.3.0.tar.gz")
-md5sums=('0b20b5c10045a32e13744a299e4c2752')
+source=("${pkgname}-${pkgver}.tar.gz")
+md5sums=('34e1937a9e3634f5890b743ff26d6330')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
