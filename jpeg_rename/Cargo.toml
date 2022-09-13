@@ -1,0 +1,11 @@
+[package]
+name = "jpeg_rename"
+version = "0.1.0"
+authors = ["kumotu4632uz"]
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.53"
+kamadak-exif = "0.5.4"
+glob = "0.3.0"
+chrono = "0.4.19"
