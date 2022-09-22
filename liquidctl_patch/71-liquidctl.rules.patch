@@ -1,0 +1,11 @@
+--- a/71-liquidctl.rules	2022-09-22 11:58:54.865549326 +0900
++++ b/71-liquidctl.rules	2022-09-22 11:59:42.659973427 +0900
+@@ -459,7 +459,7 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="1e7
+ SUBSYSTEMS=="usb", ATTRS{idVendor}=="1e71", ATTRS{idProduct}=="170e", TAG+="uaccess"
+ 
+ # NZXT Kraken X (X53, X63 or X73)
+-SUBSYSTEMS=="usb", ATTRS{idVendor}=="1e71", ATTRS{idProduct}=="2007", TAG+="uaccess"
++SUBSYSTEMS=="usb", ATTRS{idVendor}=="1e71", ATTRS{idProduct}=="2014", TAG+="uaccess"
+ 
+ # NZXT Kraken Z (Z53, Z63 or Z73)
+ SUBSYSTEMS=="usb", ATTRS{idVendor}=="1e71", ATTRS{idProduct}=="3008", TAG+="uaccess"

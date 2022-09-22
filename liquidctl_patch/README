@@ -1,0 +1,5 @@
+liquidctl v1.10.0 patch file for Kraken X53
+
+install:
+patch /usr/lib/python3.10/site-packages/liquidctl/driver/kraken3.py < kraken3.py.patch
+patch /usr/lib/udev/rules.d/71-liquidctl.rules                      < 71-liquidctl.rules.patch

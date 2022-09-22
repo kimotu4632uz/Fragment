@@ -1,0 +1,11 @@
+--- a/kraken3.py	2022-09-22 11:44:44.498652442 +0900
++++ b/kraken3.py	2022-09-22 11:45:32.292379006 +0900
+@@ -156,7 +156,7 @@ class KrakenX3(UsbHidDriver):
+     # https://github.com/liquidctl/liquidtux/blob/3b80dafead6f/nzxt-kraken3.c
+ 
+     SUPPORTED_DEVICES = [
+-        (0x1e71, 0x2007, None, 'NZXT Kraken X (X53, X63 or X73)', {
++        (0x1e71, 0x2014, None, 'NZXT Kraken X (X53, X63 or X73)', {
+             'speed_channels': _SPEED_CHANNELS_KRAKENX,
+             'color_channels': _COLOR_CHANNELS_KRAKENX,
+         })
