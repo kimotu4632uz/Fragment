@@ -1,0 +1,24 @@
+pkgname=pdftool
+pkgver=0.2.0
+pkgrel=1
+pkgdesc="insert, delete, move images, URLs of PDF."
+url="https://github.com/kimotu4632uz/pdftool"
+arch=('x86_64' 'i686')
+license=('GPLv3')
+depends=()
+makedepends=('rust')
+conflicts=()
+replaces=()
+backup=()
+source=("https://github.com/kimotu4632uz/${pkgname}/archive/refs/tags/v${pkgver}.tar.gz")
+md5sums=('0aec81f61d8d43905bf750f58ee6da40')
+
+build() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  cargo build --release
+}
+
+package() {
+  cd "${srcdir}/${pkgname}-${pkgver}"
+  install -Dm755 "target/release/${pkgname}" "${pkgdir}/usr/bin/${pkgname}"
+}
