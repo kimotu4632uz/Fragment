@@ -24,10 +24,13 @@ def filter_image(byte):
 def get(url):
     resp = requests.get(url)
     resp.raise_for_status()
-    soup = BeautifulSoup(resp.text)
+    soup = BeautifulSoup(resp.text, features="lxml")
 
-    urls = [x["src"] for x in soup.find_all("img") if "src" in x.attrs]
-    + [x["href"] for x in soup.find_all("a") if "href" in x.attrs]
+    urls = [
+        x["src"] for x in soup.find_all("img") if "src" in x.attrs
+    ] + [
+        x["href"] for x in soup.find_all("a") if "href" in x.attrs
+    ]
 
     urls = [x for x in urls if filter_url(x)]
     for url in urls:
@@ -45,7 +48,7 @@ def backup():
 
 
 def trim():
-    for file in Path.cwd().glob("*.png"):
+    for file in Path.cwd().glob("*.*"):
         img = Image.open(file)
         if img.mode == "RGBA":
             img = img.convert("RGB")
@@ -57,17 +60,17 @@ def trim():
 
 
 def genpdf():
-    files = sorted([str(x) for x in Path.cwd().glob("*.png")])
+    files = sorted([str(x) for x in Path.cwd().glob("*.*")])
     (Path.cwd() / f"{Path.cwd().name}.pdf").write_bytes(
         img2pdf.convert(files, rotation=img2pdf.Rotation.ifvalid)
     )
 
 
 command_dict = {
-    "backup": (backup, [], "backup files"),
-    "trim": (trim, [], "trim pictures"),
-    "genpdf": (genpdf, [], "generate pdf from pictures"),
-    "get": (get, ["URL"], "get image from URL")
+    "backup": (backup, None,    "backup files"),
+    "trim":   (trim,   None,    "trim pictures"),
+    "genpdf": (genpdf, None,    "generate pdf from pictures"),
+    "get":    (get,    ["URL"], "get image from URL")
 }
 
 
@@ -91,20 +94,22 @@ def main():
 
     while True:
         try:
-            cmd = input("> ").strip().split()
+            cmd, *args = input("> ").strip().split()
         except EOFError:
             print()
             break
 
-        if cmd[0] == "quit":
+        if cmd == "quit":
             break
-        elif cmd[0] == "help":
+        elif cmd == "help":
             help()
-        elif cmd[0] in command_dict:
-            if not command_dict[cmd[0]][1]:
-                command_dict[cmd[0]][0]()
+        elif cmd in command_dict:
+            func, arg, _ = command_dict[cmd]
+
+            if not arg:
+                func()
             else:
-                command_dict[cmd[0]][0](cmd[1:])
+                func(*args)
         else:
             print(f"no such command: {cmd}")
 
