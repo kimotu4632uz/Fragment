@@ -10,8 +10,8 @@ makedepends=('rust')
 conflicts=()
 replaces=()
 backup=()
-source=("${pkgname}-${pkgver}.tar.gz")
-md5sums=('34e1937a9e3634f5890b743ff26d6330')
+source=("https://github.com/kimotu4632uz/${pkgname}/archive/refs/tags/v${pkgver}.tar.gz")
+md5sums=('be97f0fbe934c15905ebdcff454a30eb')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"

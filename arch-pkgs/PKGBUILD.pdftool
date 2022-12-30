@@ -1,7 +1,7 @@
 pkgname=pdftool
-pkgver=0.2.0
+pkgver=0.3.0
 pkgrel=1
-pkgdesc="insert, delete, move images, URLs of PDF."
+pkgdesc="CLI app to manipulate URLs and images in PDF"
 url="https://github.com/kimotu4632uz/pdftool"
 arch=('x86_64' 'i686')
 license=('GPLv3')
@@ -11,7 +11,7 @@ conflicts=()
 replaces=()
 backup=()
 source=("https://github.com/kimotu4632uz/${pkgname}/archive/refs/tags/v${pkgver}.tar.gz")
-md5sums=('0aec81f61d8d43905bf750f58ee6da40')
+md5sums=('5288e9b4afd22a2e0eda47487b3968d5')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"

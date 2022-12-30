@@ -1,7 +1,7 @@
 pkgname=music_info
-pkgver=0.3.1
+pkgver=0.4.2
 pkgrel=1
-pkgdesc="read, write and edit tags and cover art from music file."
+pkgdesc="CLI app to fetch, set, and delete metadata for audio files"
 url="https://github.com/kimotu4632uz/music_info"
 arch=('x86_64')
 license=('GPLv3')
@@ -10,8 +10,8 @@ makedepends=('rust' 'clang')
 conflicts=()
 replaces=()
 backup=()
-source=("${pkgname}-${pkgver}.tar.gz")
-md5sums=('34e1937a9e3634f5890b743ff26d6330')
+source=("https://github.com/kimotu4632uz/${pkgname}/archive/refs/tags/v${pkgver}.tar.gz")
+md5sums=('a1f98108bec93d4c3bed5f6efaa94f0d')
 
 build() {
   cd "${srcdir}/${pkgname}-${pkgver}"
